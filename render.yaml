@@ -4,5 +4,5 @@ services:
     name: slack-trello-status-bot
     env: python
     buildCommand: ""
-    startCommand: python slack_webhook_listener.py
+    startCommand: gunicorn slack_webhook_listener:app
     autoDeploy: false
