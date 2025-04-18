@@ -1,0 +1,8 @@
+
+services:
+  - type: web
+    name: slack-trello-status-bot
+    env: python
+    buildCommand: ""
+    startCommand: python slack_webhook_listener.py
+    autoDeploy: false
