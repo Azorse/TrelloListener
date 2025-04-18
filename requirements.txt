@@ -3,3 +3,4 @@ flask
 slack-sdk
 python-dotenv
 requests
+gunicorn

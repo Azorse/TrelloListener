@@ -1,4 +1,3 @@
-
 import os
 import requests
 from flask import Flask, request, jsonify
@@ -10,6 +9,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
+# All your environment variables
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 SLACK_CHANNEL_ID = os.getenv("SLACK_CHANNEL_ID")
 TRELLO_API_KEY = os.getenv("TRELLO_API_KEY")
@@ -19,6 +19,7 @@ TRELLO_LIST_ID_THIS_WEEK = os.getenv("TRELLO_LIST_ID_THIS_WEEK")
 
 slack_client = WebClient(token=SLACK_BOT_TOKEN)
 
+# Helper functions
 def get_cards_from_list(list_id):
     url = f"https://api.trello.com/1/lists/{list_id}/cards"
     params = {
@@ -40,6 +41,7 @@ def build_status_message():
     message += "\n".join(f"• {card['name']}" for card in this_week) if this_week else "No cards."
     return message
 
+# Slack event route
 @app.route("/slack/events", methods=["POST"])
 def slack_events():
     data = request.get_json(force=True)
@@ -63,5 +65,6 @@ def slack_events():
 
     return jsonify({"status": "ok"})
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+# Commented out for production
+# if __name__ == "__main__":
+#     app.run(port=5000)
