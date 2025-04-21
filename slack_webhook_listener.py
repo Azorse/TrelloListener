@@ -72,7 +72,11 @@ def move_card_to_list(task_name, list_id):
             if task_name.lower() in card['name'].lower():
                 card_id = card['id']
                 url = f"https://api.trello.com/1/cards/{card_id}"
-                params = {"key": TRELLO_API_KEY, "token": TRELLO_TOKEN, "idList": list_id}
+                params = {
+                    "key": TRELLO_API_KEY, 
+                    "token": TRELLO_TOKEN, 
+                    "idList": list_id
+                    }
                 response = requests.put(url, params=params)
                 if response.status_code == 200:
                     print(f"Moved card: {task_name} to list ID {list_id}")
