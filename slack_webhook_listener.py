@@ -10,7 +10,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# All your environment variables
+# Environment variables
 SLACK_BOT_TOKEN = os.getenv("SLACK_BOT_TOKEN")
 SLACK_CHANNEL_ID = os.getenv("SLACK_CHANNEL_ID")
 TRELLO_API_KEY = os.getenv("TRELLO_API_KEY")
@@ -108,16 +108,29 @@ def slack_events():
             slack_client.chat_postMessage(channel=channel_id, text=build_status_message())
 
         elif text.startswith("new:"):
-            match = re.match(r"new:\s*(.*?)\s+for\s+(.*?)\s+due\s+(\d{8})", text, re.IGNORECASE)
-            if match:
-                title = match.group(1)
-                client = match.group(2)
-                due_raw = match.group(3)
-                due = f"{due_raw[:4]}-{due_raw[4:6]}-{due_raw[6:]}"
-                create_trello_card(title, client, "", due)
-            else:
-                slack_client.chat_postMessage(channel=event.get("channel"), text="Could not parse message: '" + text + "'")
+            content = text[4:].strip()
 
+            due_match = re.search(r"due\s+(\d{8}|\d{4}-\d{2}-\d{2})", content, re.IGNORECASE)
+            client_match = re.search(r"for\s+([\w\s&'’]+)$", content, re.IGNORECASE)
+
+            due_date = None
+            if due_match:
+                raw_due = due_match.group(1)
+                due_date = f"{raw_due[:4]}-{raw_due[4:6]}-{raw_due[6:]}" if len(raw_due) == 8 else raw_due
+
+            title = content
+            if client_match:
+                client = client_match.group(1).strip()
+                title = content[:client_match.start()].strip()
+            else:
+                client = "Unknown"
+
+            # Remove due part from title if it exists
+            if due_match:
+                title = title[:due_match.start()].strip()
+
+            create_trello_card(title, client, "", due_date)
+            
         elif text.startswith("start:"):
             move_card_to_list(text[6:].strip(), TRELLO_LIST_ID_THIS_WEEK)
 
